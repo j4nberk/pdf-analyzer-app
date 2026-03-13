@@ -78,7 +78,9 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Ayarlar")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Tamam") {

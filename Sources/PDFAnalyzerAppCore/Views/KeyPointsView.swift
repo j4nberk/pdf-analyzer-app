@@ -6,7 +6,6 @@ import UIKit
 import AppKit
 #endif
 
-// Cross-platform clipboard helper
 private func copyToClipboard(_ text: String) {
 #if canImport(UIKit)
     UIPasteboard.general.string = text
@@ -24,44 +23,39 @@ struct KeyPointsView: View {
             if let result = viewModel.analysisResult {
                 if result.keyPoints.isEmpty {
                     EmptyResultView(
-                        icon: "star",
-                        title: "Önemli nokta bulunamadı",
-                        subtitle: "Analiz sonucunda önemli nokta üretilmedi. Yeniden analiz etmeyi deneyin."
+                        icon: "star.fill",
+                        title: "No key points generated",
+                        subtitle: "Try running the analysis again with more complete course material."
                     )
                 } else {
-                    List {
-                        Section {
-                            ForEach(Array(result.keyPoints.enumerated()), id: \.offset) { index, point in
-                                KeyPointRow(index: index + 1, text: point)
-                            }
-                        } header: {
+                    VStack(alignment: .leading, spacing: 16) {
+                        StudySmartCard {
                             HStack {
-                                Image(systemName: "star.fill")
-                                    .foregroundStyle(.yellow)
-                                Text("\(result.keyPoints.count) önemli nokta")
-                                    .foregroundStyle(.secondary)
+                                Label("\(result.keyPoints.count) key insights", systemImage: "sparkles")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(StudySmartPalette.textPrimary)
+                                Spacer()
+                                Text("Long press to copy")
+                                    .font(.caption)
+                                    .foregroundStyle(StudySmartPalette.textMuted)
                             }
-                            .font(.subheadline)
-                            .textCase(nil)
+                        }
+
+                        ForEach(Array(result.keyPoints.enumerated()), id: \.offset) { index, point in
+                            KeyPointRow(index: index + 1, text: point)
                         }
                     }
                 }
             } else {
                 EmptyResultView(
-                    icon: "star",
-                    title: "Henüz analiz yapılmadı",
-                    subtitle: "Ana ekrandan belgelerinizi yükleyip analiz edin."
+                    icon: "sparkles",
+                    title: "Analysis not ready",
+                    subtitle: "Upload your PDFs and run Gemini to populate this section."
                 )
             }
         }
-        .navigationTitle("Önemli Noktalar")
-        #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-        #endif
     }
 }
-
-// MARK: - Row
 
 private struct KeyPointRow: View {
     let index: Int
@@ -69,40 +63,40 @@ private struct KeyPointRow: View {
     @State private var isCopied = false
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(Color.yellow.opacity(0.2))
-                    .frame(width: 30, height: 30)
+        StudySmartCard {
+            HStack(alignment: .top, spacing: 14) {
                 Text("\(index)")
-                    .font(.footnote.bold())
-                    .foregroundStyle(.orange)
-            }
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(Color.black.opacity(0.72))
+                    .frame(width: 34, height: 34)
+                    .background(StudySmartPalette.primary, in: Circle())
 
-            Text(text)
-                .font(.body)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                Text(text)
+                    .font(.body)
+                    .foregroundStyle(StudySmartPalette.textPrimary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                if isCopied {
+                    Text("Copied")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Color.black.opacity(0.72))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .background(StudySmartPalette.success, in: Capsule(style: .continuous))
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
         }
-        .padding(.vertical, 4)
         .contentShape(Rectangle())
         .onLongPressGesture {
             copyToClipboard(text)
-            withAnimation {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                 isCopied = true
             }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                withAnimation { isCopied = false }
-            }
-        }
-        .overlay(alignment: .topTrailing) {
-            if isCopied {
-                Text("Kopyalandı!")
-                    .font(.caption2.bold())
-                    .padding(4)
-                    .background(.green, in: RoundedRectangle(cornerRadius: 4))
-                    .foregroundStyle(.white)
-                    .transition(.scale.combined(with: .opacity))
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    isCopied = false
+                }
             }
         }
     }

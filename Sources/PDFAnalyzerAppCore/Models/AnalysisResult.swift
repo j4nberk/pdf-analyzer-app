@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Top-level result
 
 /// The structured analysis result returned by Gemini.
-struct AnalysisResult: Codable {
+struct AnalysisResult: Codable, Equatable {
     var keyPoints: [String]
     var reviewTable: [ReviewTableRow]
     var studyQuestions: [String]
@@ -13,7 +13,7 @@ struct AnalysisResult: Codable {
 // MARK: - Review table row
 
 /// A single row in the quick review table.
-struct ReviewTableRow: Codable, Identifiable {
+struct ReviewTableRow: Codable, Identifiable, Equatable {
     var id: UUID
     var concept: String
     var explanation: String
@@ -45,7 +45,7 @@ struct ReviewTableRow: Codable, Identifiable {
 // MARK: - Flashcard
 
 /// A question/answer flashcard.
-struct Flashcard: Codable, Identifiable {
+struct Flashcard: Codable, Identifiable, Equatable {
     var id: UUID
     var question: String
     var answer: String

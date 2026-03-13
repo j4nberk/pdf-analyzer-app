@@ -14,40 +14,35 @@ struct FlashcardsView: View {
         Group {
             if flashcards.isEmpty {
                 EmptyResultView(
-                    icon: "rectangle.stack",
-                    title: "Flaşkart bulunamadı",
-                    subtitle: "Analiz sonucunda flaşkart üretilmedi."
+                    icon: "rectangle.stack.fill",
+                    title: "No flashcards generated",
+                    subtitle: "The flashcard deck will appear here after a successful analysis."
                 )
             } else {
-                VStack(spacing: 0) {
-                    // Progress
-                    progressBar
+                VStack(spacing: 18) {
+                    progressHeader
 
-                    // Card area
                     ZStack {
-                        // Peek at the next card underneath
                         if currentIndex + 1 < flashcards.count {
                             FlashcardCard(
                                 card: flashcards[currentIndex + 1],
                                 isFlipped: .constant(false),
                                 dragOffset: .constant(0)
                             )
-                            .scaleEffect(0.95)
-                            .offset(y: 10)
+                            .scaleEffect(0.96)
+                            .offset(y: 16)
+                            .opacity(0.45)
                             .allowsHitTesting(false)
                         }
 
-                        // Current card on top
-                        if currentIndex < flashcards.count {
-                            FlashcardCard(
-                                card: flashcards[currentIndex],
-                                isFlipped: $isFlipped,
-                                dragOffset: $dragOffset
-                            )
-                        }
+                        FlashcardCard(
+                            card: flashcards[currentIndex],
+                            index: currentIndex + 1,
+                            total: flashcards.count,
+                            isFlipped: $isFlipped,
+                            dragOffset: $dragOffset
+                        )
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 16)
                     .gesture(
                         DragGesture()
                             .onChanged { value in
@@ -58,95 +53,127 @@ struct FlashcardsView: View {
                             }
                     )
 
-                    // Navigation controls
                     navigationControls
-                        .padding(.bottom, 20)
                 }
             }
         }
-        .navigationTitle("Flaşkartlar")
-        #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-        #endif
         .onChange(of: viewModel.analysisResult) { _, _ in
             currentIndex = 0
             isFlipped = false
+            dragOffset = 0
         }
     }
 
-    // MARK: - Progress bar
+    private var progressHeader: some View {
+        StudySmartCard {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("CARD \(currentIndex + 1) OF \(flashcards.count)")
+                        .font(.caption.weight(.bold))
+                        .tracking(1.2)
+                        .foregroundStyle(StudySmartPalette.primary)
 
-    private var progressBar: some View {
-        VStack(spacing: 4) {
-            ProgressView(value: Double(currentIndex + 1), total: Double(flashcards.count))
-                .tint(.green)
-                .padding(.horizontal, 20)
-            Text("\(currentIndex + 1) / \(flashcards.count)")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                    Spacer()
+
+                    Text(isFlipped ? "Answer visible" : "Tap to reveal")
+                        .font(.caption)
+                        .foregroundStyle(StudySmartPalette.textMuted)
+                }
+
+                GeometryReader { geometry in
+                    ZStack(alignment: .leading) {
+                        Capsule(style: .continuous)
+                            .fill(StudySmartPalette.surface)
+                        Capsule(style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [StudySmartPalette.primary, StudySmartPalette.secondary],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .frame(width: geometry.size.width * CGFloat(currentIndex + 1) / CGFloat(max(flashcards.count, 1)))
+                    }
+                }
+                .frame(height: 8)
+            }
         }
-        .padding(.top, 12)
     }
-
-    // MARK: - Navigation
 
     private var navigationControls: some View {
-        HStack(spacing: 32) {
-            Button {
+        HStack(spacing: 14) {
+            controlButton(systemImage: "arrow.left", isEnabled: currentIndex > 0) {
                 navigate(by: -1)
-            } label: {
-                Image(systemName: "arrow.left.circle.fill")
-                    .font(.system(size: 44))
-                    .foregroundStyle(currentIndex > 0 ? .blue : .secondary)
             }
-            .disabled(currentIndex == 0)
 
             Button {
-                withAnimation(.spring(response: 0.5)) {
+                withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) {
                     isFlipped.toggle()
                 }
             } label: {
-                VStack(spacing: 4) {
+                HStack(spacing: 10) {
                     Image(systemName: "arrow.triangle.2.circlepath")
-                        .font(.system(size: 28))
-                    Text(isFlipped ? "Soruya Dön" : "Cevabı Gör")
-                        .font(.caption.bold())
+                    Text(isFlipped ? "Show question" : "Reveal answer")
+                        .fontWeight(.semibold)
                 }
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.black.opacity(0.72))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(
+                    LinearGradient(
+                        colors: [StudySmartPalette.primary, StudySmartPalette.secondary],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ),
+                    in: Capsule(style: .continuous)
+                )
             }
+            .buttonStyle(.plain)
 
-            Button {
+            controlButton(systemImage: "arrow.right", isEnabled: currentIndex < flashcards.count - 1) {
                 navigate(by: 1)
-            } label: {
-                Image(systemName: "arrow.right.circle.fill")
-                    .font(.system(size: 44))
-                    .foregroundStyle(currentIndex < flashcards.count - 1 ? .blue : .secondary)
             }
-            .disabled(currentIndex >= flashcards.count - 1)
         }
     }
 
-    // MARK: - Helpers
+    private func controlButton(systemImage: String, isEnabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(isEnabled ? StudySmartPalette.textPrimary : StudySmartPalette.textMuted)
+                .frame(width: 54, height: 54)
+                .background(StudySmartPalette.surface, in: Circle())
+                .overlay(
+                    Circle()
+                        .stroke(StudySmartPalette.surfaceBorder, lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+        .disabled(!isEnabled)
+    }
 
     private func navigate(by delta: Int) {
         let newIndex = currentIndex + delta
         guard newIndex >= 0 && newIndex < flashcards.count else { return }
-        withAnimation(.spring(response: 0.4)) {
+
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.86)) {
             isFlipped = false
             dragOffset = 0
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-            withAnimation(.spring(response: 0.4)) {
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12) {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.86)) {
                 currentIndex = newIndex
             }
         }
     }
 
     private func handleSwipe(translation: CGFloat) {
-        let threshold: CGFloat = 80
-        withAnimation(.spring(response: 0.4)) {
+        let threshold: CGFloat = 70
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.86)) {
             dragOffset = 0
         }
+
         if translation < -threshold {
             navigate(by: 1)
         } else if translation > threshold {
@@ -155,86 +182,111 @@ struct FlashcardsView: View {
     }
 }
 
-// MARK: - FlashcardCard
-
 private struct FlashcardCard: View {
     let card: Flashcard
+    var index: Int = 1
+    var total: Int = 1
     @Binding var isFlipped: Bool
     @Binding var dragOffset: CGFloat
 
     var body: some View {
         ZStack {
-            // Front – question
             cardFace(
+                title: "Question",
                 text: card.question,
-                label: "SORU",
-                systemImage: "questionmark",
-                color: .blue
+                accent: StudySmartPalette.primary
             )
             .opacity(isFlipped ? 0 : 1)
             .rotation3DEffect(.degrees(isFlipped ? -90 : 0), axis: (x: 0, y: 1, z: 0))
 
-            // Back – answer
             cardFace(
+                title: "Answer",
                 text: card.answer,
-                label: "CEVAP",
-                systemImage: "checkmark",
-                color: .green
+                accent: StudySmartPalette.secondary
             )
             .opacity(isFlipped ? 1 : 0)
             .rotation3DEffect(.degrees(isFlipped ? 0 : 90), axis: (x: 0, y: 1, z: 0))
         }
         .offset(x: dragOffset)
         .onTapGesture {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+            withAnimation(.spring(response: 0.42, dampingFraction: 0.82)) {
                 isFlipped.toggle()
             }
         }
     }
 
-    private func cardFace(
-        text: String,
-        label: String,
-        systemImage: String,
-        color: Color
-    ) -> some View {
-        VStack(spacing: 16) {
-            HStack {
-                Label(label, systemImage: systemImage)
-                    .font(.caption.bold())
-                    .foregroundStyle(color)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(color.opacity(0.15), in: Capsule())
+    private func cardFace(title: String, text: String, accent: Color) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 34, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.06), Color.white.opacity(0.03)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+
+            RoundedRectangle(cornerRadius: 34, style: .continuous)
+                .stroke(StudySmartPalette.surfaceBorder, lineWidth: 1)
+
+            Circle()
+                .fill(accent.opacity(0.16))
+                .frame(width: 180, height: 180)
+                .blur(radius: 40)
+                .offset(x: 95, y: -130)
+
+            VStack(alignment: .leading, spacing: 20) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("CARD \(index) OF \(total)")
+                            .font(.caption.weight(.bold))
+                            .tracking(1.2)
+                            .foregroundStyle(accent)
+
+                        Capsule(style: .continuous)
+                            .fill(accent)
+                            .frame(width: 34, height: 4)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "square.and.arrow.up")
+                        .foregroundStyle(StudySmartPalette.textPrimary)
+                        .padding(12)
+                        .background(StudySmartPalette.surface, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                }
+
                 Spacer()
+
+                Text(text)
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(StudySmartPalette.textPrimary)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+
+                Text(isFlipped ? "Tap to go back" : "Tap to reveal the answer")
+                    .font(.subheadline)
+                    .foregroundStyle(StudySmartPalette.textSecondary)
+                    .frame(maxWidth: .infinity)
+
+                Spacer()
+
+                HStack {
+                    Label("Study deck", systemImage: "cube.transparent")
+                        .font(.footnote)
+                        .foregroundStyle(StudySmartPalette.textSecondary)
+
+                    Spacer()
+
+                    Label("Swipe for next", systemImage: "arrow.left.and.right")
+                        .font(.footnote)
+                        .foregroundStyle(StudySmartPalette.textSecondary)
+                }
             }
-
-            Spacer()
-
-            Text(text)
-                .font(.title3)
-                .multilineTextAlignment(.center)
-                .foregroundStyle(.primary)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 8)
-
-            Spacer()
-
-            Text("Kartı çevirmek için dokun")
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
+            .padding(24)
         }
-        .padding(24)
         .frame(maxWidth: .infinity)
-        .frame(height: 300)
-        .background(
-            RoundedRectangle(cornerRadius: 20)
-                .fill(.background)
-                .shadow(color: .black.opacity(0.12), radius: 16, x: 0, y: 6)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(color.opacity(0.3), lineWidth: 1.5)
-        )
+        .frame(minHeight: 420)
+        .shadow(color: Color.black.opacity(0.18), radius: 24, y: 16)
     }
 }

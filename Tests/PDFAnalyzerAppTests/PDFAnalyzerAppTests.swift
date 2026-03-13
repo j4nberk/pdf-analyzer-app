@@ -83,13 +83,13 @@ final class AnalysisResultTests: XCTestCase {
     // MARK: - AppError descriptions
 
     func testAppErrorLocalizedDescriptions() {
-        XCTAssertFalse(AppError.noAPIKey.localizedDescription!.isEmpty)
-        XCTAssertFalse(AppError.noExamDocument.localizedDescription!.isEmpty)
-        XCTAssertFalse(AppError.noStudyMaterials.localizedDescription!.isEmpty)
-        XCTAssertFalse(AppError.pdfExtractionFailed("test").localizedDescription!.isEmpty)
-        XCTAssertTrue(AppError.apiError("msg").localizedDescription!.contains("msg"))
-        XCTAssertTrue(AppError.responseParsingFailed("detail").localizedDescription!.contains("detail"))
-        XCTAssertTrue(AppError.networkError("net").localizedDescription!.contains("net"))
+        XCTAssertFalse(AppError.noAPIKey.localizedDescription.isEmpty)
+        XCTAssertFalse(AppError.noExamDocument.localizedDescription.isEmpty)
+        XCTAssertFalse(AppError.noStudyMaterials.localizedDescription.isEmpty)
+        XCTAssertFalse(AppError.pdfExtractionFailed("test").localizedDescription.isEmpty)
+        XCTAssertTrue(AppError.apiError("msg").localizedDescription.contains("msg"))
+        XCTAssertTrue(AppError.responseParsingFailed("detail").localizedDescription.contains("detail"))
+        XCTAssertTrue(AppError.networkError("net").localizedDescription.contains("net"))
     }
 
     // MARK: - Document model

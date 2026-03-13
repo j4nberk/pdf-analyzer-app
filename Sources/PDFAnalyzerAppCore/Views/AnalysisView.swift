@@ -2,47 +2,82 @@ import SwiftUI
 
 struct AnalysisView: View {
     @EnvironmentObject var viewModel: AppViewModel
-    @State private var selectedTab = 0
+    @Environment(\.dismiss) private var dismiss
+    @State private var selectedTab: AnalysisSectionTab = .flashcards
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            KeyPointsView()
-                .tabItem {
-                    Label("Önemli Noktalar", systemImage: "star.fill")
-                }
-                .tag(0)
+        ZStack {
+            StudySmartBackground()
 
-            ReviewTableView()
-                .tabItem {
-                    Label("Tekrar Tablosu", systemImage: "tablecells.fill")
-                }
-                .tag(1)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 20) {
+                    topBar
 
-            StudyQuestionsView()
-                .tabItem {
-                    Label("Çalışma Soruları", systemImage: "questionmark.circle.fill")
-                }
-                .tag(2)
+                    tabPicker
 
-            FlashcardsView()
-                .tabItem {
-                    Label("Flaşkartlar", systemImage: "rectangle.stack.fill")
+                    selectedContent
+
+                    Color.clear
+                        .frame(height: 32)
                 }
-                .tag(3)
+                .padding(.horizontal, 16)
+                .padding(.top, 12)
+                .padding(.bottom, 24)
+            }
         }
-        .navigationTitle("Analiz Sonuçları")
         #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
         #endif
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
+    }
+
+    private var topBar: some View {
+        StudySmartTopBar(
+            title: "StudySmart",
+            leading: {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .foregroundStyle(StudySmartPalette.textPrimary)
+                }
+                .buttonStyle(.plain)
+            },
+            trailing: {
                 ShareButton()
             }
+        )
+    }
+
+    private var tabPicker: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                ForEach(AnalysisSectionTab.allCases) { tab in
+                    Button {
+                        withAnimation(.spring(response: 0.32, dampingFraction: 0.85)) {
+                            selectedTab = tab
+                        }
+                    } label: {
+                        StudySmartTabPill(tab: tab, isSelected: selectedTab == tab)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 1)
+        }
+    }
+
+    @ViewBuilder
+    private var selectedContent: some View {
+        switch selectedTab {
+        case .keyPoints:
+            KeyPointsView()
+        case .reviewTables:
+            ReviewTableView()
+        case .studyQuestions:
+            StudyQuestionsView()
+        case .flashcards:
+            FlashcardsView()
         }
     }
 }
-
-// MARK: - Share button
 
 private struct ShareButton: View {
     @EnvironmentObject var viewModel: AppViewModel
@@ -51,6 +86,7 @@ private struct ShareButton: View {
         if let result = viewModel.analysisResult {
             ShareLink(item: buildShareText(result: result)) {
                 Image(systemName: "square.and.arrow.up")
+                    .foregroundStyle(StudySmartPalette.textPrimary)
             }
         }
     }
@@ -58,28 +94,28 @@ private struct ShareButton: View {
     private func buildShareText(result: AnalysisResult) -> String {
         var lines: [String] = []
 
-        lines.append("📚 PDF ANALİZ SONUÇLARI")
-        lines.append(String(repeating: "=", count: 40))
+        lines.append("STUDYSMART ANALYSIS")
+        lines.append(String(repeating: "=", count: 32))
 
-        lines.append("\n⭐ ÖNEMLİ NOKTALAR")
-        for (i, point) in result.keyPoints.enumerated() {
-            lines.append("\(i + 1). \(point)")
+        lines.append("\nKEY POINTS")
+        for (index, point) in result.keyPoints.enumerated() {
+            lines.append("\(index + 1). \(point)")
         }
 
-        lines.append("\n📋 HIZLI TEKRAR TABLOSU")
+        lines.append("\nREVIEW TABLE")
         for row in result.reviewTable {
             lines.append("• \(row.concept): \(row.explanation)")
         }
 
-        lines.append("\n❓ ÇALIŞMA SORULARI")
-        for (i, q) in result.studyQuestions.enumerated() {
-            lines.append("\(i + 1). \(q)")
+        lines.append("\nSTUDY QUESTIONS")
+        for (index, question) in result.studyQuestions.enumerated() {
+            lines.append("\(index + 1). \(question)")
         }
 
-        lines.append("\n🃏 FLAŞKARTLAR")
-        for (i, card) in result.flashcards.enumerated() {
-            lines.append("S\(i + 1): \(card.question)")
-            lines.append("C\(i + 1): \(card.answer)")
+        lines.append("\nFLASHCARDS")
+        for (index, card) in result.flashcards.enumerated() {
+            lines.append("Q\(index + 1): \(card.question)")
+            lines.append("A\(index + 1): \(card.answer)")
         }
 
         return lines.joined(separator: "\n")

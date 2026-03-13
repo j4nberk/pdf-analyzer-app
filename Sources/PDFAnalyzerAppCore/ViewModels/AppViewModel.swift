@@ -4,7 +4,7 @@ import Combine
 // MARK: - AppViewModel
 
 @MainActor
-final class AppViewModel: ObservableObject {
+public final class AppViewModel: ObservableObject {
 
     // MARK: Documents
     @Published var examQuestionsDocument: Document?
@@ -35,7 +35,7 @@ final class AppViewModel: ObservableObject {
         "gemini-3.1-flash-image"
     ]
 
-    init() {
+    public init() {
         apiKey = UserDefaults.standard.string(forKey: "geminiAPIKey") ?? ""
         selectedModel = UserDefaults.standard.string(forKey: "geminiModel") ?? "gemini-3.1-flash"
     }

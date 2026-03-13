@@ -8,68 +8,58 @@ struct StudyQuestionsView: View {
             if let result = viewModel.analysisResult {
                 if result.studyQuestions.isEmpty {
                     EmptyResultView(
-                        icon: "questionmark.circle",
-                        title: "Soru bulunamadı",
-                        subtitle: "Analiz sonucunda çalışma sorusu üretilmedi."
+                        icon: "questionmark.circle.fill",
+                        title: "No study questions generated",
+                        subtitle: "Try adding richer lecture material and rerun the analysis."
                     )
                 } else {
-                    List {
-                        Section {
-                            ForEach(Array(result.studyQuestions.enumerated()), id: \.offset) { index, question in
-                                StudyQuestionRow(index: index + 1, question: question)
-                            }
-                        } header: {
+                    VStack(alignment: .leading, spacing: 16) {
+                        StudySmartCard {
                             HStack {
-                                Image(systemName: "questionmark.circle.fill")
-                                    .foregroundStyle(.purple)
-                                Text("\(result.studyQuestions.count) çalışma sorusu")
-                                    .foregroundStyle(.secondary)
+                                Label("\(result.studyQuestions.count) prompts ready", systemImage: "brain")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(StudySmartPalette.textPrimary)
+                                Spacer()
+                                Text("Answer before checking notes")
+                                    .font(.caption)
+                                    .foregroundStyle(StudySmartPalette.textMuted)
                             }
-                            .font(.subheadline)
-                            .textCase(nil)
-                        } footer: {
-                            Text("Soruları kendi başınıza cevaplamaya çalışın; ardından notlarınızla karşılaştırın.")
-                                .font(.caption)
+                        }
+
+                        ForEach(Array(result.studyQuestions.enumerated()), id: \.offset) { index, question in
+                            StudyQuestionRow(index: index + 1, question: question)
                         }
                     }
                 }
             } else {
                 EmptyResultView(
-                    icon: "questionmark.circle",
-                    title: "Henüz analiz yapılmadı",
-                    subtitle: "Ana ekrandan belgelerinizi yükleyip analiz edin."
+                    icon: "sparkles",
+                    title: "Analysis not ready",
+                    subtitle: "This section fills with self-test questions after Gemini finishes."
                 )
             }
         }
-        .navigationTitle("Çalışma Soruları")
-        #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-        #endif
     }
 }
-
-// MARK: - Row
 
 private struct StudyQuestionRow: View {
     let index: Int
     let question: String
 
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(Color.purple.opacity(0.15))
-                    .frame(width: 30, height: 30)
+        StudySmartCard {
+            HStack(alignment: .top, spacing: 14) {
                 Text("\(index)")
-                    .font(.footnote.bold())
-                    .foregroundStyle(.purple)
-            }
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(Color.black.opacity(0.72))
+                    .frame(width: 34, height: 34)
+                    .background(StudySmartPalette.tertiary, in: Circle())
 
-            Text(question)
-                .font(.body)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                Text(question)
+                    .font(.body)
+                    .foregroundStyle(StudySmartPalette.textPrimary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
         }
-        .padding(.vertical, 4)
     }
 }

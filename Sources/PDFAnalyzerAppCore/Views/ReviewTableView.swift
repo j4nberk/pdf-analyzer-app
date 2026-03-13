@@ -18,81 +18,104 @@ struct ReviewTableView: View {
             if let result = viewModel.analysisResult {
                 if result.reviewTable.isEmpty {
                     EmptyResultView(
-                        icon: "tablecells",
-                        title: "Tablo bulunamadı",
-                        subtitle: "Analiz sonucunda tekrar tablosu üretilmedi."
+                        icon: "tablecells.fill",
+                        title: "No review table generated",
+                        subtitle: "The model did not return summary rows for this analysis."
                     )
                 } else {
-                    List {
-                        Section {
-                            ForEach(filteredRows) { row in
-                                ReviewRowView(row: row)
-                            }
-                        } header: {
+                    VStack(alignment: .leading, spacing: 16) {
+                        searchField
+
+                        StudySmartCard {
                             HStack {
-                                Image(systemName: "tablecells.fill")
-                                    .foregroundStyle(.blue)
-                                Text("\(result.reviewTable.count) kavram")
-                                    .foregroundStyle(.secondary)
+                                Label("\(filteredRows.count) review rows", systemImage: "tablecells")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(StudySmartPalette.textPrimary)
+                                Spacer()
+                                Text(searchText.isEmpty ? "All concepts" : "Filtered")
+                                    .font(.caption)
+                                    .foregroundStyle(StudySmartPalette.textMuted)
                             }
-                            .font(.subheadline)
-                            .textCase(nil)
+                        }
+
+                        ForEach(filteredRows) { row in
+                            ReviewRowView(row: row)
                         }
                     }
-                    .searchable(text: $searchText, prompt: "Kavram ara…")
                 }
             } else {
                 EmptyResultView(
-                    icon: "tablecells",
-                    title: "Henüz analiz yapılmadı",
-                    subtitle: "Ana ekrandan belgelerinizi yükleyip analiz edin."
+                    icon: "sparkles",
+                    title: "Analysis not ready",
+                    subtitle: "Once you analyze your PDFs, the concept breakdown appears here."
                 )
             }
         }
-        .navigationTitle("Tekrar Tablosu")
-        #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-        #endif
+    }
+
+    private var searchField: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(StudySmartPalette.textMuted)
+
+            TextField("Search concept or explanation", text: $searchText)
+                .textFieldStyle(.plain)
+                .foregroundStyle(StudySmartPalette.textPrimary)
+
+            if !searchText.isEmpty {
+                Button {
+                    searchText = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(StudySmartPalette.textMuted)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(StudySmartPalette.surface, in: Capsule(style: .continuous))
+        .overlay(
+            Capsule(style: .continuous)
+                .stroke(StudySmartPalette.surfaceBorder, lineWidth: 1)
+        )
     }
 }
-
-// MARK: - Row
 
 private struct ReviewRowView: View {
     let row: ReviewTableRow
     @State private var isExpanded = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Text(row.concept)
-                    .font(.headline)
-                    .foregroundStyle(.primary)
-                Spacer()
-                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+        StudySmartCard {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(row.concept)
+                            .font(.headline)
+                            .foregroundStyle(StudySmartPalette.textPrimary)
 
-            if isExpanded {
-                Text(row.explanation)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-            } else {
-                Text(row.explanation)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
+                        Text(isExpanded ? row.explanation : row.explanation)
+                            .font(.subheadline)
+                            .foregroundStyle(StudySmartPalette.textSecondary)
+                            .lineLimit(isExpanded ? nil : 3)
+                    }
+
+                    Spacer(minLength: 12)
+
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(StudySmartPalette.textMuted)
+                        .padding(10)
+                        .background(StudySmartPalette.surface, in: Circle())
+                }
             }
         }
         .contentShape(Rectangle())
         .onTapGesture {
-            withAnimation(.spring(response: 0.3)) {
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
                 isExpanded.toggle()
             }
         }
-        .padding(.vertical, 4)
     }
 }
