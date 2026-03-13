@@ -98,6 +98,7 @@ flutter_app/
 | `shared_preferences` | ^2.3.4 | Kalıcı anahtar-değer depolama |
 | `http` | ^1.2.2 | Gemini REST API için HTTP istemcisi |
 | `syncfusion_flutter_pdf` | ^27.1.58 | PDF metin ayıklama (iOS & Android) |
+| `url_launcher` | ^6.3.2 | Harici URL'leri tarayıcıda açma |
 
 ## Kullanılan Model Seçenekleri
 
