@@ -1,6 +1,6 @@
-# PDF Analiz Uygulaması
+# StudySmart
 
-Gemini API ile desteklenen iOS/macOS uygulaması. Yüklediğiniz slaytlar ve PDF belgelerini, geçmiş sınav sorularınıza göre analiz ederek önemli noktalar, hızlı tekrar tabloları, çalışma soruları ve flaşkartlar üretir.
+Gemini API ile desteklenen cross-platform Flutter uygulaması. Yüklediğiniz slaytlar ve PDF belgelerini, geçmiş sınav sorularınıza göre analiz ederek önemli noktalar, hızlı tekrar tabloları, çalışma soruları ve flaşkartlar üretir.
 
 ## Özellikler
 
@@ -11,35 +11,36 @@ Gemini API ile desteklenen iOS/macOS uygulaması. Yüklediğiniz slaytlar ve PDF
 | 📋 **Hızlı Tekrar Tablosu** | Kavram → Açıklama formatında özet tablo |
 | ❓ **Çalışma Soruları** | Materyale dayalı 10 düşündürücü soru |
 | 🃏 **Flaşkartlar** | Dokunarak çevirilen etkileşimli soru/cevap kartları |
-| 🔗 **Paylaşım** | Analiz sonuçlarını metin olarak paylaşın |
+| 🔗 **Paylaşım** | Analiz sonuçlarını panoya kopyalayın |
 
 ## Gereksinimler
 
-- **Xcode 15** veya üzeri
-- **iOS 17+** veya **macOS 14+** hedef
+- **Flutter SDK 3.35+** — [flutter.dev](https://flutter.dev/docs/get-started/install) adresinden indirin
+- **Dart SDK 3.9+**
+- **Android Studio** veya **VS Code** (Flutter eklentisi ile)
 - **Google Gemini API anahtarı** — [aistudio.google.com](https://aistudio.google.com) adresinden ücretsiz alabilirsiniz
 
 ## Kurulum
 
-### 1. Xcode'da Açın
+### 1. Repoyu Klonlayın
 
 ```bash
-git clone https://github.com/j4nberk/pdf-analyzer-app.git
-cd pdf-analyzer-app
-open Package.swift   # Xcode otomatik olarak açılır
+git clone https://github.com/j4nberk/StudySmart.git
+cd StudySmart/flutter_app
 ```
 
-> **Not:** Xcode, `Package.swift` dosyasını açtığında projeyi otomatik olarak yapılandırır.
+### 2. Bağımlılıkları Yükleyin
 
-### 2. Hedef Seçin
+```bash
+flutter pub get
+```
 
-Xcode araç çubuğundan istediğiniz hedefi seçin:
-- **iPhone Simülatörü** veya gerçek cihaz
-- **My Mac (Designed for iPad)** — Mac'te çalıştırmak için
+### 3. Uygulamayı Çalıştırın
 
-### 3. Build & Run
-
-`⌘R` ile uygulamayı başlatın.
+```bash
+# Bağlı cihaz veya emülatörde çalıştırın
+flutter run
+```
 
 ### 4. API Anahtarı Ekleyin
 
@@ -55,52 +56,69 @@ Uygulama açıldıktan sonra sağ üstteki ⚙️ **Ayarlar** simgesine dokunun 
    - **Önemli Noktalar** — Madde madde kritik bilgiler
    - **Tekrar Tablosu** — Kavram → Açıklama özet tablosu (arama destekli)
    - **Çalışma Soruları** — Sınav tarzı sorular
-   - **Flaşkartlar** — Sola/sağa kaydırarak veya ok tuşlarıyla geçin, karta dokunarak çevirin
+   - **Flaşkartlar** — Sola/sağa kaydırarak geçin, karta dokunarak çevirin
 
 ## Proje Yapısı
 
 ```
-Sources/PDFAnalyzerApp/
-├── PDFAnalyzerApp.swift          # Uygulama giriş noktası (@main)
-├── ContentView.swift             # Ana ekran
-├── Models/
-│   ├── AnalysisResult.swift      # Analiz sonuç modeli (JSON kodlanabilir)
-│   ├── AppError.swift            # Özel hata türleri
-│   └── Document.swift            # Belge modeli
-├── Services/
-│   ├── GeminiService.swift       # Gemini REST API istemcisi
-│   └── PDFService.swift          # PDFKit tabanlı metin ayıklayıcı
-├── ViewModels/
-│   └── AppViewModel.swift        # Merkezi durum yöneticisi (@MainActor)
-└── Views/
-    ├── AnalysisView.swift        # Sekmeli sonuç ekranı
-    ├── DocumentUploadView.swift  # Belge yükleme ekranı
-    ├── EmptyResultView.swift     # Boş durum görünümü
-    ├── FlashcardsView.swift      # Etkileşimli flaşkart ekranı
-    ├── KeyPointsView.swift       # Önemli noktalar listesi
-    ├── ReviewTableView.swift     # Hızlı tekrar tablosu
-    ├── SettingsView.swift        # API anahtarı ve model ayarları
-    └── StudyQuestionsView.swift  # Çalışma soruları listesi
+flutter_app/
+├── lib/
+│   ├── main.dart                     # Uygulama giriş noktası
+│   ├── models/
+│   │   ├── analysis_result.dart      # Analiz sonuç modeli (JSON kodlanabilir)
+│   │   ├── app_error.dart            # Özel hata türleri
+│   │   └── document.dart             # Belge modeli
+│   ├── services/
+│   │   ├── gemini_service.dart       # Gemini REST API istemcisi
+│   │   └── pdf_service.dart          # PDF metin ayıklayıcı (syncfusion_flutter_pdf)
+│   ├── theme/
+│   │   └── study_smart_theme.dart    # Uygulama teması ve renk paleti
+│   ├── viewmodels/
+│   │   └── app_view_model.dart       # Merkezi durum yöneticisi (ChangeNotifier)
+│   └── views/
+│       ├── analysis_view.dart        # Sekmeli sonuç ekranı
+│       ├── content_view.dart         # Ana ekran
+│       ├── document_upload_view.dart # Belge yükleme ekranı
+│       ├── empty_result_view.dart    # Boş durum görünümü
+│       ├── flashcards_view.dart      # Etkileşimli flaşkart ekranı
+│       ├── key_points_view.dart      # Önemli noktalar listesi
+│       ├── review_table_view.dart    # Hızlı tekrar tablosu
+│       ├── settings_view.dart        # API anahtarı ve model ayarları
+│       └── study_questions_view.dart # Çalışma soruları listesi
+└── test/
+    └── pdf_analyzer_test.dart        # Birim testleri
 ```
+
+## Kullanılan Paketler
+
+| Paket | Sürüm | Açıklama |
+|---|---|---|
+| `provider` | ^6.1.2 | State management |
+| `file_picker` | ^8.1.7 | Cross-platform dosya seçici |
+| `shared_preferences` | ^2.3.4 | Kalıcı anahtar-değer depolama |
+| `http` | ^1.2.2 | Gemini REST API için HTTP istemcisi |
+| `syncfusion_flutter_pdf` | ^27.1.58 | PDF metin ayıklama (iOS & Android) |
 
 ## Kullanılan Model Seçenekleri
 
 | Model | Hız | Kalite | Kullanım |
 |---|---|---|---|
 | `gemini-2.0-flash` | ⚡ Hızlı | ✅ Yüksek | Varsayılan — çoğu belge için ideal |
+| `gemini-2.0-flash-lite` | ⚡ En Hızlı | ✅ İyi | Hız öncelikli kullanım |
 | `gemini-1.5-flash` | ⚡ Hızlı | ✅ İyi | Dengeli seçenek |
 | `gemini-1.5-pro` | 🐢 Yavaş | 🏆 En yüksek | Karmaşık belgeler için |
 
 ## Güvenlik
 
-- API anahtarı `UserDefaults` içinde saklanır (geliştirme ortamı içindir).
-- Üretim uygulamaları için API anahtarını iOS **Keychain** veya bir arka uç proxy üzerinden saklayın.
+- API anahtarı `SharedPreferences` içinde saklanır (geliştirme ortamı içindir).
+- Üretim uygulamaları için API anahtarını güvenli bir depolama alanında veya arka uç proxy üzerinden yönetin.
 - PDF metni yalnızca Gemini API'ye iletilir; başka bir sunucuya gönderilmez.
 
 ## Testler
 
 ```bash
-swift test
+cd flutter_app
+dart test test/pdf_analyzer_test.dart
 ```
 
 Testler; model kodlama/çözme, hata mesajları ve API yanıt ayrıştırma mantığını kapsar.
