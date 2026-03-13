@@ -1,0 +1,34 @@
+# Flutter/Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+
+# Android
+android/.gradle
+android/local.properties
+android/key.properties
+android/captures/
+android/gradlew
+android/gradlew.bat
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/flutter_export_environment.sh
+
+# macOS
+macos/Flutter/GeneratedPluginRegistrant.swift
+
+# Test coverage
+coverage/
+
+# IntelliJ / Android Studio / VS Code
+.idea/
+*.iml
+.vscode/
+
+# Generated files
+*.g.dart
+*.freezed.dart

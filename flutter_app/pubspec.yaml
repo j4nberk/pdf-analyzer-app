@@ -1,0 +1,38 @@
+name: pdf_analyzer_app
+description: PDF Analiz Uygulaması - Gemini API destekli çalışma asistanı
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management (replaces Swift @ObservableObject / EnvironmentObject)
+  provider: ^6.1.2
+
+  # Cross-platform file picker (replaces iOS UIDocumentPickerViewController)
+  file_picker: ^8.1.7
+
+  # Persistent key-value storage (replaces UserDefaults)
+  shared_preferences: ^2.3.4
+
+  # HTTP client for Gemini REST API calls
+  http: ^1.2.2
+
+  # PDF text extraction - null-safe, supports Android and iOS
+  syncfusion_flutter_pdf: ^27.1.58
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Package test for running pure Dart unit tests with dart test
+  test: ^1.25.0
+
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
