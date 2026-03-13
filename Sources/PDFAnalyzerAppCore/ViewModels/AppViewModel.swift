@@ -29,14 +29,15 @@ final class AppViewModel: ObservableObject {
 
     // MARK: Available models
     let availableModels: [String] = [
-        "gemini-2.0-flash",
-        "gemini-1.5-flash",
-        "gemini-1.5-pro"
+        "gemini-3.1-flash",
+        "gemini-3.1-pro",
+        "gemini-3.1-flash-lite",
+        "gemini-3.1-flash-image"
     ]
 
     init() {
         apiKey = UserDefaults.standard.string(forKey: "geminiAPIKey") ?? ""
-        selectedModel = UserDefaults.standard.string(forKey: "geminiModel") ?? "gemini-2.0-flash"
+        selectedModel = UserDefaults.standard.string(forKey: "geminiModel") ?? "gemini-3.1-flash"
     }
 
     // MARK: - Document management

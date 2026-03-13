@@ -91,21 +91,24 @@ struct SettingsView: View {
 
     private func modelDisplayName(_ model: String) -> String {
         switch model {
-        case "gemini-2.0-flash": return "Gemini 2.0 Flash (Önerilen)"
-        case "gemini-1.5-flash": return "Gemini 1.5 Flash"
-        case "gemini-1.5-pro":   return "Gemini 1.5 Pro"
-        default:                 return model
+        case "gemini-3.1-flash":      return "Gemini 3.1 Flash (Önerilen)"
+        case "gemini-3.1-pro":        return "Gemini 3.1 Pro"
+        case "gemini-3.1-flash-lite": return "Gemini 3.1 Flash Lite"
+        case "gemini-3.1-flash-image": return "Gemini 3.1 Flash Image"
+        default:                      return model
         }
     }
 
     private func modelDescription(_ model: String) -> String {
         switch model {
-        case "gemini-2.0-flash":
+        case "gemini-3.1-flash":
             return "Hızlı ve yetenekli. Çoğu belge için idealdir."
-        case "gemini-1.5-flash":
-            return "Dengeli hız ve kalite."
-        case "gemini-1.5-pro":
+        case "gemini-3.1-pro":
             return "En yüksek kalite. Büyük belgeler için uygundur, ancak daha yavaş olabilir."
+        case "gemini-3.1-flash-lite":
+            return "Dengeli hız ve kalite. Hafif belgeler için uygundur."
+        case "gemini-3.1-flash-image":
+            return "Görsel içerikli belgeler için optimize edilmiştir."
         default:
             return ""
         }

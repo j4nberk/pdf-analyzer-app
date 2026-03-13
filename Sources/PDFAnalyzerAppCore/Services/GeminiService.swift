@@ -61,12 +61,12 @@ struct GeminiService {
     ///   - examQuestionsText: Plain text extracted from the past exam questions document.
     ///   - studyMaterialText: Plain text extracted from the study material documents.
     ///   - apiKey: The Gemini API key.
-    ///   - model: The Gemini model identifier (default: `gemini-2.0-flash`).
+    ///   - model: The Gemini model identifier (default: `gemini-3.1-flash`).
     func analyze(
         examQuestionsText: String,
         studyMaterialText: String,
         apiKey: String,
-        model: String = "gemini-2.0-flash"
+        model: String = "gemini-3.1-flash"
     ) async throws -> AnalysisResult {
         guard !apiKey.trimmingCharacters(in: .whitespaces).isEmpty else {
             throw AppError.noAPIKey
