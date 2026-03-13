@@ -22,7 +22,7 @@ class AppViewModel extends ChangeNotifier {
 
   // MARK: - Settings
   String _apiKey = '';
-  String _selectedModel = 'gemini-2.0-flash';
+  String _selectedModel = 'gemini-2.5-flash';
 
   String get apiKey => _apiKey;
   String get selectedModel => _selectedModel;
@@ -45,11 +45,11 @@ class AppViewModel extends ChangeNotifier {
 
   // MARK: - Available Models
   static const List<String> availableModels = [
-    'gemini-2.0-pro-exp',
+    'gemini-2.5-pro',
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
     'gemini-2.0-flash',
     'gemini-2.0-flash-lite',
-    'gemini-1.5-pro',
-    'gemini-1.5-flash',
   ];
 
   SharedPreferences? _prefs;
@@ -61,7 +61,7 @@ class AppViewModel extends ChangeNotifier {
   Future<void> _loadPreferences() async {
     _prefs = await SharedPreferences.getInstance();
     _apiKey = _prefs!.getString('geminiAPIKey') ?? '';
-    _selectedModel = _prefs!.getString('geminiModel') ?? 'gemini-2.0-flash';
+    _selectedModel = _prefs!.getString('geminiModel') ?? 'gemini-2.5-flash';
     notifyListeners();
   }
 

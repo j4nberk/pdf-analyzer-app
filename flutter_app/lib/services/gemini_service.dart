@@ -17,7 +17,7 @@ class GeminiService {
     String? examQuestionsText,
     required String studyMaterialText,
     required String apiKey,
-    String model = 'gemini-2.0-flash',
+    String model = 'gemini-2.5-flash',
   }) async {
     if (apiKey.trim().isEmpty) {
       throw AppError.noAPIKey;
