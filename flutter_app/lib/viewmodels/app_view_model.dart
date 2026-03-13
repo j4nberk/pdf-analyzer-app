@@ -60,7 +60,18 @@ class AppViewModel extends ChangeNotifier {
   Future<void> _loadPreferences() async {
     _prefs = await SharedPreferences.getInstance();
     _apiKey = _prefs!.getString('geminiAPIKey') ?? '';
-    _selectedModel = _prefs!.getString('geminiModel') ?? 'gemini-2.5-flash';
+
+    final String fallbackModel = 'gemini-2.5-flash';
+    final String? storedModel = _prefs!.getString('geminiModel');
+
+    if (storedModel != null && availableModels.contains(storedModel)) {
+      _selectedModel = storedModel;
+    } else {
+      _selectedModel = fallbackModel;
+      // Normalize stored preference to a valid model
+      await _prefs!.setString('geminiModel', fallbackModel);
+    }
+
     notifyListeners();
   }
 

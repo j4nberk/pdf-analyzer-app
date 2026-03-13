@@ -165,7 +165,7 @@ class _AnalysisTabView extends StatelessWidget {
             ),
           ),
 
-          if (vm.examQuestionsDocument == null && vm.studyMaterials.isEmpty)
+          if (vm.studyMaterials.isEmpty)
             StudySmartCard(
               padding: const EdgeInsets.all(20),
               child: const StudySmartEmptyCard(
