@@ -48,15 +48,15 @@ class DocumentUploadView extends StatelessWidget {
           // -- EXAM QUESTIONS SECTION --
           const _SectionLabel(
             icon: Icons.quiz_rounded,
-            title: 'Geçmiş Sınav Soruları',
-            subtitle: 'Referans olarak kullanılacak sınav soruları PDF\'i',
+            title: 'Geçmiş Sınav Soruları (Opsiyonel)',
+            subtitle: 'Referans olarak kullanılacak sınav soruları PDF\'i — isteğe bağlı',
             color: StudySmartPalette.primary,
           ),
           const SizedBox(height: 10),
 
           if (vm.examQuestionsDocument == null)
             _UploadPlaceholder(
-              label: 'Sınav soruları PDF\'ini seçin',
+              label: 'Sınav soruları PDF\'ini seçin (isteğe bağlı)',
               icon: Icons.upload_file_rounded,
               onTap: () async {
                 final result = await _pickPDF();
@@ -179,7 +179,7 @@ class DocumentUploadView extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: StudySmartPalette.backgroundTop,
-        title: const Text('PDF Analiz', style: TextStyle(color: StudySmartPalette.textPrimary)),
+        title: const Text('StudyMed+', style: TextStyle(color: StudySmartPalette.textPrimary)),
         content: const Text(
           'Sürüm 1.0.0\nGoogle Gemini API destekli çalışma asistanı.',
           style: TextStyle(color: StudySmartPalette.textSecondary),

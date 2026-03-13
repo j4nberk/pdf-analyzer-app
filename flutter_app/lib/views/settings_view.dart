@@ -36,7 +36,7 @@ class _SettingsViewState extends State<SettingsView> {
     'gemini-2.0-flash': 'Gemini 2.0 Flash (Önerilen)',
     'gemini-1.5-flash': 'Gemini 1.5 Flash',
     'gemini-1.5-pro': 'Gemini 1.5 Pro',
-    'gemini-2.0-flash-lite': 'Gemini 2.0 Flash Lite',
+    'gemini-2.0-flash-lite': 'Gemini 2.0 Flash-Lite',
   };
 
   static const _modelDescriptions = {
@@ -226,7 +226,7 @@ class _SettingsViewState extends State<SettingsView> {
                 cornerRadius: 16,
                 child: Column(
                   children: [
-                    _InfoRow(label: 'Uygulama', value: 'PDF Analiz'),
+                    _InfoRow(label: 'Uygulama', value: 'StudyMed+'),
                     const Divider(color: StudySmartPalette.surfaceBorder, height: 1),
                     _InfoRow(label: 'Sürüm', value: '1.0.0'),
                     const Divider(color: StudySmartPalette.surfaceBorder, height: 1),

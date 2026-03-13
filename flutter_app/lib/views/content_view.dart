@@ -20,6 +20,7 @@ class ContentView extends StatefulWidget {
 
 class _ContentViewState extends State<ContentView> {
   int _selectedTab = 0;
+  late final PageController _pageController;
 
   final List<_DockItem> _dockItems = const [
     _DockItem(label: 'Belgeler', icon: Icons.folder_rounded),
@@ -27,6 +28,28 @@ class _ContentViewState extends State<ContentView> {
     _DockItem(label: 'Sonuçlar', icon: Icons.layers_rounded),
     _DockItem(label: 'Ayarlar', icon: Icons.settings_rounded),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _selectedTab);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _switchTab(int index) {
+    if (index == _selectedTab) return;
+    setState(() => _selectedTab = index);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeInOut,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,25 +62,26 @@ class _ContentViewState extends State<ContentView> {
           child: Column(
             children: [
               Expanded(
-                child: IndexedStack(
-                  index: _selectedTab,
+                child: PageView(
+                  controller: _pageController,
+                  physics: const NeverScrollableScrollPhysics(),
                   children: [
                     // Tab 0: Document upload
                     DocumentUploadView(
-                      onAnalyzeTap: () => setState(() => _selectedTab = 1),
+                      onAnalyzeTap: () => _switchTab(1),
                     ),
                     // Tab 1: Analysis trigger / results preview
                     _AnalysisTabView(
-                      onOpenFullAnalysis: () => setState(() => _selectedTab = 2),
+                      onOpenFullAnalysis: () => _switchTab(2),
                     ),
                     // Tab 2: Full analysis view
                     vm.analysisResult != null
                         ? AnalysisView(
                             result: vm.analysisResult!,
-                            onBack: () => setState(() => _selectedTab = 1),
+                            onBack: () => _switchTab(1),
                           )
                         : _NoResultsView(
-                            onGoToDocuments: () => setState(() => _selectedTab = 0),
+                            onGoToDocuments: () => _switchTab(0),
                           ),
                     // Tab 3: Settings
                     const SettingsView(),
@@ -69,7 +93,7 @@ class _ContentViewState extends State<ContentView> {
               _StudySmartDock(
                 items: _dockItems,
                 selectedIndex: _selectedTab,
-                onItemSelected: (i) => setState(() => _selectedTab = i),
+                onItemSelected: _switchTab,
               ),
             ],
           ),
@@ -147,7 +171,7 @@ class _AnalysisTabView extends StatelessWidget {
               child: const StudySmartEmptyCard(
                 icon: Icons.upload_file_rounded,
                 title: 'Belge Yüklenmedi',
-                subtitle: 'Analiz başlatmak için önce "Belgeler" sekmesinden PDF yükleyin.',
+                subtitle: 'Analiz başlatmak için önce "Belgeler" sekmesinden en az bir çalışma materyali yükleyin.',
               ),
             ),
 
