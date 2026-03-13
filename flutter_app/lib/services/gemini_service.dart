@@ -12,12 +12,12 @@ class GeminiService {
 
   GeminiService({http.Client? client}) : _client = client ?? http.Client();
 
-  /// Analyzes the study material against past exam questions and returns a structured result.
+  /// Analyzes the study material (optionally against past exam questions) and returns a structured result.
   Future<AnalysisResult> analyze({
-    required String examQuestionsText,
+    String? examQuestionsText,
     required String studyMaterialText,
     required String apiKey,
-    String model = 'gemini-2.0-flash',
+    String model = 'gemini-2.5-flash',
   }) async {
     if (apiKey.trim().isEmpty) {
       throw AppError.noAPIKey;
@@ -114,20 +114,10 @@ class GeminiService {
 
   // MARK: - Prompt Builder
 
-  String _buildPrompt({
-    required String examQuestionsText,
-    required String studyMaterialText,
-  }) {
-    // Limit texts to avoid exceeding token limits while keeping most relevant content
-    const maxChars = 30000;
-    final trimmedExam = examQuestionsText.length > maxChars
-        ? examQuestionsText.substring(0, maxChars)
-        : examQuestionsText;
-    final trimmedMaterial = studyMaterialText.length > maxChars
-        ? studyMaterialText.substring(0, maxChars)
-        : studyMaterialText;
+  String _trimText(String text, int maxChars) =>
+      text.length > maxChars ? text.substring(0, maxChars) : text;
 
-    return '''
+  String _buildTwoDocumentPrompt(String examText, String materialText) => '''
 Sen deneyimli bir eğitim asistanısın. Sana iki belge veriyorum:
 
 1. Geçmiş Sınav Soruları Belgesi - Öğrencinin daha önce gördüğü veya çıkmış sınav soruları
@@ -135,10 +125,10 @@ Sen deneyimli bir eğitim asistanısın. Sana iki belge veriyorum:
 
 ---
 GEÇMİŞ SINAV SORULARI:
-$trimmedExam
+$examText
 ---
 ÇALIŞMA MATERYALİ:
-$trimmedMaterial
+$materialText
 ---
 
 Bu iki belgeyi analiz ederek aşağıdakileri oluştur:
@@ -149,8 +139,27 @@ Bu iki belgeyi analiz ederek aşağıdakileri oluştur:
 
 3. **studyQuestions**: Çalışma materyaline ve geçmiş sınav sorularının tarzına dayalı 10 özgün çalışma sorusu. Sorular öğrenciyi düşündürmeli ve konuyu pekiştirmeli.
 
-4. **flashcards**: Etkili ezberleme için 10 flaşkart. Her flaşkartta "question" (kısa, net bir soru) ve "answer" (özlü bir cevap) olmalı.
+4. **flashcards**: Etkili ezberleme için 10 flaşkart. Her flaşkartta "question" (kısa, net bir soru) ve "answer" (özlü bir cevap) olmalı.''';
 
+  String _buildSingleDocumentPrompt(String materialText) => '''
+Sen deneyimli bir eğitim asistanısın. Sana bir çalışma materyali veriyorum:
+
+---
+ÇALIŞMA MATERYALİ:
+$materialText
+---
+
+Bu belgeyi analiz ederek aşağıdakileri oluştur:
+
+1. **keyPoints**: Çalışma materyalindeki en önemli 15 nokta. Her nokta kısa, net ve öğrencinin öğrenmesi gereken temel bilgi içermeli.
+
+2. **reviewTable**: Anahtar kavramları ve açıklamalarını içeren hızlı tekrar tablosu. En az 10, en fazla 15 satır. Her satırda "concept" (kavram/terim) ve "explanation" (kısa açıklama) olmalı.
+
+3. **studyQuestions**: Çalışma materyaline dayalı 10 özgün çalışma sorusu. Sorular öğrenciyi düşündürmeli ve konuyu pekiştirmeli.
+
+4. **flashcards**: Etkili ezberleme için 10 flaşkart. Her flaşkartta "question" (kısa, net bir soru) ve "answer" (özlü bir cevap) olmalı.''';
+
+  static const _jsonFormatInstruction = '''
 YALNIZCA aşağıdaki JSON formatında yanıt ver, başka hiçbir metin ekleme:
 {
   "keyPoints": ["nokta1", "nokta2", "..."],
@@ -163,8 +172,24 @@ YALNIZCA aşağıdaki JSON formatında yanıt ver, başka hiçbir metin ekleme:
     {"question": "soru", "answer": "cevap"},
     "..."
   ]
-}
-''';
+}''';
+
+  String _buildPrompt({
+    String? examQuestionsText,
+    required String studyMaterialText,
+  }) {
+    // Limit texts to avoid exceeding token limits while keeping most relevant content
+    const maxChars = 30000;
+    final trimmedMaterial = _trimText(studyMaterialText, maxChars);
+
+    final hasExamQuestions =
+        examQuestionsText != null && examQuestionsText.trim().isNotEmpty;
+
+    final docSection = hasExamQuestions
+        ? _buildTwoDocumentPrompt(_trimText(examQuestionsText!, maxChars), trimmedMaterial)
+        : _buildSingleDocumentPrompt(trimmedMaterial);
+
+    return '$docSection\n\n$_jsonFormatInstruction\n';
   }
 
   // MARK: - Response Parsing

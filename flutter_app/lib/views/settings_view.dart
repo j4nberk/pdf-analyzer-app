@@ -33,17 +33,17 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   static const _modelDisplayNames = {
-    'gemini-2.0-flash': 'Gemini 2.0 Flash (Önerilen)',
-    'gemini-1.5-flash': 'Gemini 1.5 Flash',
-    'gemini-1.5-pro': 'Gemini 1.5 Pro',
-    'gemini-2.0-flash-lite': 'Gemini 2.0 Flash Lite',
+    'gemini-2.5-flash': 'Gemini 2.5 Flash (Önerilen)',
+    'gemini-2.5-flash-lite': 'Gemini 2.5 Flash-Lite',
+    'gemini-2.0-flash': 'Gemini 2.0 Flash',
+    'gemini-2.0-flash-lite': 'Gemini 2.0 Flash-Lite',
   };
 
   static const _modelDescriptions = {
-    'gemini-2.0-flash': 'Hızlı ve güçlü — çoğu belge için ideal.',
-    'gemini-1.5-flash': 'Dengeli hız ve kalite.',
-    'gemini-1.5-pro': 'En yüksek kalite, karmaşık belgeler için.',
-    'gemini-2.0-flash-lite': 'En hızlı seçenek, basit belgeler için.',
+    'gemini-2.5-flash': 'En yeni kararlı model — ücretsiz, hızlı ve güçlü.',
+    'gemini-2.5-flash-lite': 'En yeni hafif model — ücretsiz, en hızlı ve ekonomik.',
+    'gemini-2.0-flash': 'Önceki nesil — kararlı ve ücretsiz.',
+    'gemini-2.0-flash-lite': 'Önceki nesil hafif — en hızlı ve ücretsiz.',
   };
 
   @override
@@ -226,7 +226,7 @@ class _SettingsViewState extends State<SettingsView> {
                 cornerRadius: 16,
                 child: Column(
                   children: [
-                    _InfoRow(label: 'Uygulama', value: 'PDF Analiz'),
+                    _InfoRow(label: 'Uygulama', value: 'StudyMed+'),
                     const Divider(color: StudySmartPalette.surfaceBorder, height: 1),
                     _InfoRow(label: 'Sürüm', value: '1.0.0'),
                     const Divider(color: StudySmartPalette.surfaceBorder, height: 1),

@@ -22,7 +22,7 @@ class AppViewModel extends ChangeNotifier {
 
   // MARK: - Settings
   String _apiKey = '';
-  String _selectedModel = 'gemini-2.0-flash';
+  String _selectedModel = 'gemini-2.5-flash';
 
   String get apiKey => _apiKey;
   String get selectedModel => _selectedModel;
@@ -45,9 +45,9 @@ class AppViewModel extends ChangeNotifier {
 
   // MARK: - Available Models
   static const List<String> availableModels = [
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
     'gemini-2.0-flash',
-    'gemini-1.5-flash',
-    'gemini-1.5-pro',
     'gemini-2.0-flash-lite',
   ];
 
@@ -60,7 +60,18 @@ class AppViewModel extends ChangeNotifier {
   Future<void> _loadPreferences() async {
     _prefs = await SharedPreferences.getInstance();
     _apiKey = _prefs!.getString('geminiAPIKey') ?? '';
-    _selectedModel = _prefs!.getString('geminiModel') ?? 'gemini-2.0-flash';
+
+    final String fallbackModel = 'gemini-2.5-flash';
+    final String? storedModel = _prefs!.getString('geminiModel');
+
+    if (storedModel != null && availableModels.contains(storedModel)) {
+      _selectedModel = storedModel;
+    } else {
+      _selectedModel = fallbackModel;
+      // Normalize stored preference to a valid model
+      await _prefs!.setString('geminiModel', fallbackModel);
+    }
+
     notifyListeners();
   }
 
@@ -118,20 +129,14 @@ class AppViewModel extends ChangeNotifier {
 
   // MARK: - Analysis
 
-  /// Whether the app can run an analysis (both docs loaded, API key set, not already running).
+  /// Whether the app can run an analysis (study materials loaded, API key set, not already running).
   bool get canAnalyze =>
-      examQuestionsDocument != null &&
       studyMaterials.isNotEmpty &&
       _apiKey.trim().isNotEmpty &&
       !isAnalyzing;
 
   /// Sends documents to Gemini for analysis and stores the result.
   Future<void> analyze() async {
-    if (examQuestionsDocument == null) {
-      analysisError = AppError.noExamDocument.message;
-      notifyListeners();
-      return;
-    }
     if (studyMaterials.isEmpty) {
       analysisError = AppError.noStudyMaterials.message;
       notifyListeners();
@@ -154,7 +159,7 @@ class AppViewModel extends ChangeNotifier {
 
     try {
       final result = await _geminiService.analyze(
-        examQuestionsText: examQuestionsDocument!.extractedText,
+        examQuestionsText: examQuestionsDocument?.extractedText,
         studyMaterialText: combinedStudyText,
         apiKey: _apiKey,
         model: _selectedModel,
